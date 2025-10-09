@@ -31,7 +31,6 @@ Ultimate start and end gcode for Bambulab P1S/P1P printers
 The order of operation is:<br>
  - Reset machine status
  - Preheat and home
- - Check if the previous mesh is ok, if not, make another one
  - Do the complete bed mesh if it was checked, also do the vibration calibration
  - Prepare AMS if needed
  - Purge and wipe
