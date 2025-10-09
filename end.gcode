@@ -1,12 +1,10 @@
 ;============================================================
 ;=========== End G-code for Bambu Lab P1S WITH AMS ==========
-;======== Author: CaosMaker =========== Version: 2.0 ========
+;======== Author: CaosMaker =========== Version: 2.3 ========
 ;============ Please read readme.md for info ================
 ;============================================================
-; https://github.com/CaosMaker96/Bambulab-P1S-Ultimate-Start-and-End-gCode
 
-
-M400                                         ; wait for buffer to clear
+M400                                         ; wait for print  to finish
 G92 E0                                       ; zero the extruder
 G1 E-0.6 F300                                ; retract
 G91                                          ; incremental positioning
@@ -39,16 +37,14 @@ G1 Y265 F3000
 G1 X100 F18000                               ; first wipe
 G1 X60 Y265
 G1 X100 F5000                                ; second wipe
-G1 X70 F15000
+G1 X70 Y263 F15000
 G1 X100 F5000
-G1 X70 F15000
+G1 X70 Y262 F15000
 G1 X100 F5000
-G1 X70 F15000
+G1 X70 Y263 F15000
 G1 X100 F5000
-G1 X70 F15000
-G1 X100 F5000  
-G1 X65 F5000
-M400
+G1 X65 Y264 F15000
+M400 
 
 G29.2 S0                                     ; ABL off
 M400 S3                                      ; wait
@@ -75,6 +71,7 @@ M623                                         ; end of "timelapse_record_flag"
 
 ;===== Restore currents and magnitudes ====================
 M17 X0.8 Y0.8 Z0.5                           ; motors to 45% power
+G29.1 Z{+0.0}                                ; clear z-trim value
 M220 S100                                    ; Reset feedrate magnitude
 M201.2 K1.0                                  ; Reset acc magnitude
 M73.2   R1.0                                 ; Reset left time magnitude
