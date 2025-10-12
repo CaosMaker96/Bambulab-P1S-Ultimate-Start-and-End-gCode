@@ -1,5 +1,5 @@
 ;========== Start G-code for Bambu Lab P1S WITH AMS =========
-;======== Author: CaosMaker =========== Version: 2.3 ========
+;======== Author: CaosMaker =========== Version: 2.4 ========
 ;============ Please read readme.md for info ================
 ;============================================================
 
@@ -18,31 +18,17 @@ M106 P2 S0                                   ; aux
 M106 P3 S0                                   ; chamber
 M710 A1 S255                                 ; MC board fan auto
 
+
 ;===== Preheat bed and nozzle then home =====================
 M1002 gcode_claim_action :2                  ; display: heating bed
 M140 S[bed_temperature_initial_layer_single] ; set bed temp
 M104 S140                                    ; set extruder temp to 140 to reduce oozing but melt any residue
-G28 X Y                                      ; home x and y
 M190 S[bed_temperature_initial_layer_single] ; wait for bed temp
 M1002 gcode_claim_action : 7                 ; display: heating hotend
 M109 S140                                    ; wait for extruder temp
-M1002 gcode_claim_action : 13                ; display: homing
-G28 Z                                        ; home z
-M400                                         ; wait
-G29.2 S1                                     ; enable ABL
-
-;===== Bed leveling NOT checked =============================
-
-M1002 judge_flag g29_before_print_flag
-M622 J0
-  M1002 gcode_claim_action : 1               ; display: bed leveling
-  G28 Z                                      ; home
-  G29 A                                      ; load stored mesh
-  M400                                       ; wait to finish
-M623
 
 ;===== Bed leveling checked =================================
-M1002 judge_flag g29_before_print_flag       ; if bed leveling is checked in the slicer
+M1002 judge_flag g29_before_print_flag
 M622 J1                                      ; do the bed leveling mesh
   G29 A X{first_layer_print_min[0]} Y{first_layer_print_min[1]} I{first_layer_print_size[0]} J{first_layer_print_size[1]}
   M400                                       ; wait
@@ -56,6 +42,15 @@ M622 J1                                      ; do the bed leveling mesh
   M500                                       ; save
 M623
 
+;===== Bed leveling NOT checked =============================
+M1002 judge_flag g29_before_print_flag
+M622 J0
+    M1002 gcode_claim_action : 13
+    G28
+M623
+
+
+G29.2 S1                                     ; enable ABL
 ;===== prepare AMS =========================================
 M1002 gcode_claim_action :4                  ; display: loading filament
 G1 Z10                                       ; lift z
@@ -85,17 +80,18 @@ G92 E0
 G1 E20 F200                                  ; purge 20mm
 M400
 {if initial_tool!=initial_extruder}         ; if the filament has been changed
+  G92 E0
   G1 E40 F350                                ; extra purge only on change
   M400
 {endif}
 G92 E0
 G1 E-1 F300                                  ; retract 1mm
-M104 S-20                                    ; drop nozzle temp to make filament shrink
+M104 S{nozzle_temperature_initial_layer[initial_extruder]-20}   ; drop nozzle temp to make filament shrink
 M106 P1 S255                                 ; Part fan full
 M400 S8                                      ; wait 8 sec
 M104 S[nozzle_temperature_initial_layer]     ; nozzle at print temperature
 G92 E0
-G1 E-0.5F300                                 ; retract 0.5mm
+G1 E-1 F300                                  ; retract 1mm
 M400                                         ; wait to finish
 
 M106 P1 S125                                 ; Part fan mid power
@@ -139,11 +135,6 @@ M83                                          ; extruder to relative pos
     G29.1 Z{-0.04}                           ; lower z offset
 {endif}
 
-;curr_bed_type={curr_bed_type}
-{if curr_bed_type=="Textured PEI Plate"}
-G29.1 Z{-0.04} ; for Textured PEI Plate
-{endif}
-
 
 G1 X18.0 Y1.0 Z0.28 F18000
 G1 E2 F300
@@ -160,3 +151,4 @@ M1002 gcode_claim_action : 0                 ; reset status
 ;== result of using this code on any machine. Please read =
 ;===== the readme.md file to properly test the code. ======
 ;==========================================================
+
