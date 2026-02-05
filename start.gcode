@@ -154,7 +154,7 @@ G90                                          ; absolute positioning
 M83                                          ; extruder to relative pos
 
 {if curr_bed_type=="Textured PEI Plate"}     ; for texture PEI plate
-    G29.1 Z{-0.08}                           ; lower z offset
+    G29.1 Z{-0.04}                           ; lower z offset
 {endif}
 
 
@@ -168,6 +168,7 @@ M1002 gcode_claim_action : 0                 ; reset status
 ;== result of using this code on any machine. Please read =
 ;===== the readme.md file to properly test the code. ======
 ;==========================================================
+
 
 
 
