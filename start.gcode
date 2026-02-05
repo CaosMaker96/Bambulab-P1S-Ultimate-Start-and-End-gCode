@@ -1,5 +1,5 @@
 ;========== Start G-code for Bambu Lab P1S WITH AMS =========
-;======== Author: CaosMaker =========== Version: 2.4 ========
+;======== Author: CaosMaker =========== Version: 2.7 ========
 ;============ Please read readme.md for info ================
 ;============================================================
 
@@ -26,27 +26,29 @@ M104 S140                                    ; set extruder temp to 140 to reduc
 M190 S[bed_temperature_initial_layer_single] ; wait for bed temp
 M1002 gcode_claim_action : 7                 ; display: heating hotend
 M109 S140                                    ; wait for extruder temp
+G29.2 S1                                     ; turn on ABL
 
-;===== Bed leveling checked =================================
+;===== Bed leveling  =================================
 M1002 judge_flag g29_before_print_flag
-M622 J1                                      ; do the bed leveling mesh
-  G29 A X{first_layer_print_min[0]} Y{first_layer_print_min[1]} I{first_layer_print_size[0]} J{first_layer_print_size[1]}
-  M400                                       ; wait
-  G1 X128 Y128 Z10 F20000                    ; Mech Mode Fast Check
-  M970.3 Q1 A7 B30 C80 H15 K0
-  M974 Q1 S2 P0
-  M400 P200
-  M970.3 Q0 A7 B30 C90 Q0 H15 K0
-  M974 Q0 S2 P0
-  M400                                       ; wait
-  M500                                       ; save
+M622 J1
+    G29 A X{first_layer_print_min[0]} Y{first_layer_print_min[1]} I{first_layer_print_size[0]} J{first_layer_print_size[1]}
+    M400                                       ; wait
+    G1 X128 Y128 Z10 F20000                    ; Mech Mode Fast Check
+    M970.3 Q1 A7 B30 C80 H15 K0
+    M974 Q1 S2 P0
+    M400 P200
+    M970.3 Q0 A7 B30 C90 Q0 H15 K0
+    M974 Q0 S2 P0
+    M400                                       ; wait
+    M500                                       ; save
 M623
 
-;===== Bed leveling NOT checked =============================
 M1002 judge_flag g29_before_print_flag
 M622 J0
+
     M1002 gcode_claim_action : 13
     G28
+
 M623
 
 
@@ -56,9 +58,10 @@ M1002 gcode_claim_action :4                  ; display: loading filament
 G1 Z10                                       ; lift z
 M620 M
 M620 S[initial_extruder]A                    ; switch material if AMS exists
+    G1 X65 Y265 F12000                       ; go to park
     M109 S250                                ; wait for nozzle purge temp
     G92 E0                                   ; zero the extruder
-    G1 E-12 F200                             ; retract 12 mm
+    G1 E-15 F200                             ; retract 15 mm
     ; Cutter sequence
     G1 X120 F12000
     G1 X20 Y50 F12000                        ; go to cut position
@@ -79,9 +82,9 @@ M1002 gcode_claim_action : 14                ; display: cleaning nozzle
 G92 E0
 G1 E20 F200                                  ; purge 20mm
 M400
-{if initial_tool!=initial_extruder}         ; if the filament has been changed
+{if initial_tool!=initial_extruder}          ; if the filament has been changed
   G92 E0
-  G1 E40 F350                                ; extra purge only on change
+  G1 E60 F350                                ; extra purge only on change
   M400
 {endif}
 G92 E0
@@ -123,6 +126,25 @@ M400                                         ; wait to finish
 
 
 ;===== fast nozzle load line ==============================
+;
+;optional, I reccomend disabling this by adding ; before each line
+;and instead use 3 skirt loops
+;
+T1000
+G1 X18.0 Y1.0 Z0.8 F18000;Move to start position
+M109 S{nozzle_temperature_initial_layer[initial_extruder]}
+G1 Z0.2
+G0 E2 F300
+G0 X240 E15 F{outer_wall_volumetric_speed/(0.3*0.5)     * 60}
+G0 Y11 E0.700 F{outer_wall_volumetric_speed/(0.3*0.5)/ 4 * 60}
+G0 X239.5
+G0 E0.2
+G0 Y1.5 E0.700
+G0 X25 E15 F{outer_wall_volumetric_speed/(0.3*0.5)     * 60}
+M400
+
+;===== start print ========================================
+
 M106 P1 S0                                   ; Part fan off
 M975 S1                                      ; turn on vibration suppression
 M1002 gcode_claim_action : 7                 ; display: heating hotend
@@ -132,16 +154,11 @@ G90                                          ; absolute positioning
 M83                                          ; extruder to relative pos
 
 {if curr_bed_type=="Textured PEI Plate"}     ; for texture PEI plate
-    G29.1 Z{-0.04}                           ; lower z offset
+    G29.1 Z{-0.08}                           ; lower z offset
 {endif}
 
 
-G1 X18.0 Y1.0 Z0.28 F18000
-G1 E2 F300
-G1 X200 E8  F{outer_wall_volumetric_speed/(0.3*0.5)*60}
-G1 Y8   E1.5 F{outer_wall_volumetric_speed/(0.3*0.5)/4*60}
-G1 X40  E6  F{outer_wall_volumetric_speed/(0.3*0.5)*60}
-G1 E-0.6 F300
+
 M106 P1 S0                                   ; aux fan off
 M1002 gcode_claim_action : 0                 ; reset status
 
@@ -151,4 +168,6 @@ M1002 gcode_claim_action : 0                 ; reset status
 ;== result of using this code on any machine. Please read =
 ;===== the readme.md file to properly test the code. ======
 ;==========================================================
+
+
 
