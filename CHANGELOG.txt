@@ -1,0 +1,4 @@
+===========  v2.7 ============
+-Removed bed level check in start.gcode as it wasn't working properly, instead now the printer levels the bed if the option is checked in the slicer, and also does the vibration calibration. If not checked it just homes.
+-Improved nozzle load line, but I suggest to comment it out and use just 3 skirt loops.
+-Changed unload to ams in end.gcode to work properly
