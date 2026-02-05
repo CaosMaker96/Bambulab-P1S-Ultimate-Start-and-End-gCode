@@ -1,6 +1,6 @@
 ;============================================================
 ;=========== End G-code for Bambu Lab P1S WITH AMS ==========
-;======== Author: CaosMaker =========== Version: 2.3 ========
+;======== Author: CaosMaker =========== Version: 2.7 ========
 ;============ Please read readme.md for info ================
 ;============================================================
 
@@ -14,20 +14,6 @@ M106 P1 S180
 M106 P2 S120
 M106 P3 S120                                 ; fans to mid power
 M140 S0                                      ; turn off bed
-
-;===== Cut filament and pull back to AMS (disabled) =======
-;===== Remove semicolon to enable =========================
-;  G1 X65 Y245 F12000                         ; go to purge area
-;  G1 Y265 F3000
-;  G1 X100 F12000                             ; wipe
-;  M620 S255
-;  G1 X20 Y50 F12000                          ; go to cut area
-;  G92 E0
-;  G1 E-12 F200                               ; retract 12 mm
-;  G1 Y-3                                     ; cut
-;  M621 S255                                  ; retract to ams
-;  T255                                       ; ams status: no filament loaded
-
 
 ;===== wipe nozzle ========================================
 M104 S140                                    ; extruder to 140
@@ -61,6 +47,17 @@ M104 S0                                      ; extruder off
    G1 Z{max_layer_z + 25.0} F600             ; lift 25 mm if there is space
 {endif}
 
+;===== Cut filament and pull back to AMS (disabled) =======
+;===== Remove semicolon to enable =========================
+;M620 S255
+;G1 X20 Y50 F12000                          ; go to cut area
+;G92 E0
+;G1 E-12 F200                               ; retract 12 mm
+;G1 Y-3                                     ; cut
+;M621 S255                                  ; retract to ams
+;T255
+
+
 ;===== end timelapse ======================================
 M622.1 S1                                    ; for prev firware, default turned on
 M1002 judge_flag timelapse_record_flag
@@ -83,3 +80,6 @@ M1002 set_gcode_claim_speed_level : 0        ; reset display
 ;== result of using this code on any machine. Please read =
 ;===== the readme.md file to properly test the code. ======
 ;==========================================================
+
+
+
