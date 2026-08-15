@@ -1,6 +1,7 @@
 ;============================================================
 ;=========== End G-code for Bambu Lab P1S WITH AMS ==========
-;======== Author: CaosMaker =========== Version: 2.7 ========
+;======== Author: CaosMaker (Edited by roffiervalj)==========
+;======================= Version: 2.7.1 =====================
 ;============ Please read readme.md for info ================
 ;============================================================
 
@@ -8,29 +9,29 @@ M400                                         ; wait for print  to finish
 G92 E0                                       ; zero the extruder
 G1 E-0.6 F300                                ; retract
 G91                                          ; incremental positioning
-G1 Z2 F1500                                  ; lift
+G1 Z1 X5 Y5 F3000                            ; spiral lift + retreat
+G1 X-10 Y5 F3000
+G1 X5 Y-10 F3000
+G1 Z2 X5 Y5 F3000
 G90                                          ; absolute positioning
+G1 Z{max_layer_z + 2} F900                   ; absolute clearance
 M106 P1 S180
 M106 P2 S120
 M106 P3 S120                                 ; fans to mid power
 M140 S0                                      ; turn off bed
 
-;===== wipe nozzle ========================================
+;===== wipe nozzle ==========================================
 M104 S140                                    ; extruder to 140
 G1 X65 Y245 F12000                           ; go to purge area
-G1 Y265 F3000
 
+G1 Y265 F3000
 G1 X100 F18000                               ; first wipe
 G1 X60 Y265
 G1 X100 F5000                                ; second wipe
 G1 X70 Y263 F15000
-G1 X100 F5000
-G1 X70 Y262 F15000
-G1 X100 F5000
-G1 X70 Y263 F15000
-G1 X100 F5000
+G1 X100 F5000                                ; third wipe
 G1 X65 Y264 F15000
-M400 
+M400
 
 G29.2 S0                                     ; ABL off
 M400 S3                                      ; wait
@@ -38,17 +39,13 @@ M106 P1 S0
 M106 P2 S0
 M106 P3 S0                                   ; all fan off
 
-;===== park and lower bed =================================
-G1 X65 Y245 F12000                           ; go to purge area
-G1 Y265 F3000
+;===== park and lower bed ===================================
 M104 S0                                      ; extruder off
-{if (max_layer_z + 25.0) < 250}
-   M17 Z0.4                                  ; lower z current to reduce impact
-   G1 Z{max_layer_z + 25.0} F600             ; lift 25 mm if there is space
-{endif}
+M17 Z0.4                                     ; lower z current to reduce impact
+G1 Z{min(max_layer_z + 25.0, 250)} F600      ; lift 25mm, or as close as the build volume allows
 
-;===== Cut filament and pull back to AMS (disabled) =======
-;===== Remove semicolon to enable =========================
+;===== Cut filament and pull back to AMS (disabled) =========
+;===== Remove semicolon to enable ===========================
 ;M620 S255
 ;G1 X20 Y50 F12000                          ; go to cut area
 ;G92 E0
@@ -58,7 +55,7 @@ M104 S0                                      ; extruder off
 ;T255
 
 
-;===== end timelapse ======================================
+;===== end timelapse ========================================
 M622.1 S1                                    ; for prev firware, default turned on
 M1002 judge_flag timelapse_record_flag
 M622 J1
@@ -66,7 +63,7 @@ M622 J1
     M991 S0 P-1                              ; end smooth timelapse at safe pos
 M623                                         ; end of "timelapse_record_flag"
 
-;===== Restore currents and magnitudes ====================
+;===== Restore currents and magnitudes ======================
 M17 X0.8 Y0.8 Z0.5                           ; motors to 45% power
 G29.1 Z{+0.0}                                ; clear z-trim value
 M220 S100                                    ; Reset feedrate magnitude
@@ -74,12 +71,9 @@ M201.2 K1.0                                  ; Reset acc magnitude
 M73.2   R1.0                                 ; Reset left time magnitude
 M1002 set_gcode_claim_speed_level : 0        ; reset display
 
-;==========================================================
-;== Disclaimer: In any case the author cannot be held  ====
-;==== responsible for any damage or unwanted effect as ====
-;== result of using this code on any machine. Please read =
-;===== the readme.md file to properly test the code. ======
-;==========================================================
-
-
-
+;============================================================
+;== Disclaimer: In any case the author cannot be held  ======
+;==== responsible for any damage or unwanted effect as ======
+;== result of using this code on any machine. Please read ===
+;===== the readme.md file to properly test the code. ========
+;============================================================
