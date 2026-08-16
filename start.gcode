@@ -56,7 +56,6 @@ M623
 M1002 gcode_claim_action :4                  ; display: loading filament
 G1 Z10                                       ; lift z
 M620 M
-M620 S[initial_extruder]A                    ; switch material if AMS exists
 {if initial_tool != initial_extruder}        ; filament actually needs to change — full cut/reload
     M620 S[initial_extruder]A                ; switch material if AMS exists
         G1 X65 Y265 F12000                   ; go to park
